@@ -1,115 +1,112 @@
 "use client";
 
-
 import React, { useState } from "react";
 import Image from "next/image";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import FloatingLabelInput from "@/components/FloatingLabelInput";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
-import axios from "axios";
+import { loginUser } from "@/lib/fetch";
+import { LoginResponse } from '@/lib/types';
 
-// Definimos el esquema de validación usando Zod
 const loginSchema = z.object({
-  email: z
+  username: z
     .string()
-    .email("Introduce un correo electrónico válido.")
+    .min(3, "El numero de documento o la contraseña son incorrectas")
     .min(1),
   password: z
     .string()
-    .min(6, "La contraseña debe tener al menos 6 caracteres.")
+    .min(3, "El numero de documento o la contraseña son incorrectas")
     .min(1),
 });
 
 const LoginPage = () => {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [fieldError, setFieldError] = useState({ username: false, password: false })
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    // Validamos los datos de entrada con el esquema de Zod
-    const validation = loginSchema.safeParse({ email, password });
+    const validation = loginSchema.safeParse({ username, password });
     if (!validation.success) {
-      setError(validation.error.errors[0].message);
+      const errorField = validation.error.errors[0].path[0] as "email" | "password";
+      setFieldError((prev) => ({ ...prev, [errorField]: true }));
       return;
     }
 
     try {
-      const response = await axios.post("/api/login", { email, password });
+      const credentials = { username, password };
+      const { token, user }: LoginResponse = await loginUser(credentials);
 
-      if (response.status === 200) {
-        router.push("/dashboard"); // Redirige a la página principal después del login exitoso
-      } else {
-        throw new Error("Credenciales incorrectas.");
-      }
+      localStorage.setItem('token', token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      router.push(`/dashboard/users`);
+
     } catch (err) {
-      setError(
-        (axios.isAxiosError(err) && err.response?.data?.message) ||
-        "Error en el servidor."
-      );
+      setError("Numero de documento o contraseña incorrectos");
+      const errorField = err as "email" | "password";
+      setFieldError((prev) => ({ ...prev, [errorField]: true }));
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-black px-4">
-      <Card className="w-full max-w-md p-4 bg-gray-800">
-        <CardHeader className="flex flex-col items-center">
+    <div className="flex items-center justify-center min-h-screen bg-gray-900 px-4">
+      <Card className="w-full max-w-md p-4 bg-black border-none">
+        <CardHeader className="flex flex-col items-center mb-6">
           <Image
-            src="/dTalentLogo.png" // Cambia esta ruta por la de tu logo
+            src="/dTalentLogo.png"
             alt="Logo"
-            width={100}
-            height={100}
+            width={200}
+            height={200}
             className="mb-4"
           />
-          <CardTitle className="text-white text-2xl">Iniciar Sesión</CardTitle>
         </CardHeader>
 
         <form onSubmit={handleLogin}>
           <CardContent>
             {error && (
-              <p className="text-red-500 text-center mb-4">{error}</p>
-            )}
-
-            <div className="mb-4">
-              <label htmlFor="email" className="text-gray-300 block mb-2">
-                Correo electrónico
-              </label>
-              <Input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full"
-                placeholder="correo@ejemplo.com"
-                required
+                <p className="text-red-500 text-center mb-4">{error}</p>
+              )}
+            <div className="mb-8">
+              <FloatingLabelInput
+                type="username"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Numero de documento"
+                hasError={fieldError.username}
               />
             </div>
 
-            <div className="mb-4">
-              <label htmlFor="password" className="text-gray-300 block mb-2">
-                Contraseña
-              </label>
-              <Input
+            <div className="mb-8">
+              <FloatingLabelInput
                 type="password"
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full"
-                placeholder="********"
-                required
+                placeholder="Contraseña"
+                hasError={fieldError.password}
               />
             </div>
           </CardContent>
 
           <CardFooter>
-            <Button type="submit" className="w-full bg-blue-600 text-white hover:bg-blue-700">
-              Iniciar Sesión
-            </Button>
+            <div className="flex-col w-full">
+              <Button type="submit" className="w-full bg-blue-700 text-white hover:bg-blue-800">
+                INICIAR SESIÓN
+              </Button>
+              <div
+                className=" flex justify-center items-center w-full text-blue-600 hover:text-blue-700 mt-8"
+              >
+                ¿Olvidaste tu contraseña?
+              </div>
+            </div>
           </CardFooter>
         </form>
       </Card>
