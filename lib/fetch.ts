@@ -21,7 +21,7 @@ export const loginUser = async (credentials: LoginCredentials): Promise<LoginRes
     const response = await axiosInstance.post('/users/demo_login/', credentials);
     return response.data;
   } catch (error) {
-    console.error('Error al iniciar sesión:', error);
+    console.log('Error al iniciar sesión:', error);
     throw error;
   }
 };
@@ -60,7 +60,7 @@ export const fetchUsers = async ({
 
     return response.data;
   } catch (error) {
-    console.error("Error al obtener la lista de empleados:", error);
+    console.log("Error al obtener la lista de empleados:", error);
     throw error;
   }
 };
@@ -108,6 +108,9 @@ export const fetchReceipts = async ({
   token,
   year,
 }: FetchReceiptsParams): Promise<FetchReceiptsResponse> => {
+
+  console.log(url)
+
   try {
     const response = await axiosInstance.get(url, {
       headers: {
@@ -118,9 +121,10 @@ export const fetchReceipts = async ({
       },
     });
     console.log("success receipts")
+    console.log(response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching receipts:", error);
+    console.log("Error fetching receipts:", error);
     throw error;
   }
 };
@@ -148,7 +152,7 @@ export const fetchReceiptFile = async ({ id, token }: FetchReceiptFileParams): P
       throw new Error("Failed to fetch PDF file link");
     }
   } catch (error) {
-    console.error("Error fetching PDF file:", error);
+    console.log("Error fetching PDF file:", error);
     throw error;
   }
 };

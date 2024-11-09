@@ -156,8 +156,8 @@ export default function RecibosPage() {
                 onChange={handleSortChange}
                 className="border border-gray-300 rounded px-2 py-1 text-sm"
               >
-                <option>Más recientes</option>
-                <option>Más antiguos</option>
+                <option value="date_desc">Más recientes</option>
+                <option value="date_asc">Más antiguos</option>
               </select>
               <button 
                 className="text-blue-600"
@@ -240,7 +240,7 @@ export default function RecibosPage() {
             <>
               <div className="overflow-hidden border border-gray-200 rounded-lg">
                 <table className="w-full">
-                  <thead className="bg-blue-500 text-white">
+                  <thead className="bg-blue-500 text-white m-auto">
                     <tr>
                       <th className="px-6 py-3 text-left text-sm font-semibold">Tipo</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold">Empleado</th>
@@ -260,27 +260,27 @@ export default function RecibosPage() {
                         <td className="px-6 py-4 text-blue-600">{recibo.type}</td>
                         <td className="px-6 py-4">{recibo.employeeFullName}</td>
                         <td className="px-6 py-4">{`${recibo.month}/${recibo.year}`}</td>
-                        <td className="px-6 py-4 flex items-center space-x-2">
+                        <td className="px-6 py-4 flex-col items-center space-x-2">
                           {recibo.isSended ? (
-                            <FiCheckCircle className="text-green-500" />
+                            <FiCheckCircle className="text-green-500 m-auto" />
                           ) : (
                             <FiXCircle className="text-gray-400" />
                           )}
-                          <span>{formatRelativeDate(recibo.sendedDate)}</span>
+                          <span className="m-auto">{formatRelativeDate(recibo.sendedDate)}</span>
                         </td>
-                        <td className="px-6 py-4 space-x-2">
+                        <td className="px-6 py-4">
                           {recibo.isReaded ? (
-                            <FiCheckCircle className="text-green-500" />
+                            <FiCheckCircle className="text-green-500 m-auto" />
                           ) : (
-                            <FiXCircle className="text-gray-400" />
+                            <FiXCircle className="text-gray-400 m-auto" />
                           )}
-                          <span>{formatRelativeDate(recibo.readedDate)}</span>
+                          <span className="m-auto">{formatRelativeDate(recibo.readedDate)}</span>
                         </td>
-                        <td className="px-6 py-4 ">
+                        <td className="px-6 py-4">
                           {recibo.isSigned ? (
-                            <FiCheckCircle className="text-green-500" />
+                            <FiCheckCircle className="text-green-500 m-auto" />
                           ) : (
-                            <FiXCircle className="text-gray-400" />
+                            <FiXCircle className="text-gray-400 m-auto" />
                           )}
                         </td>
                       </tr>

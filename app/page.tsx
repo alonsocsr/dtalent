@@ -36,6 +36,7 @@ const LoginPage = () => {
     if (!validation.success) {
       const errorField = validation.error.errors[0].path[0] as "email" | "password";
       setFieldError((prev) => ({ ...prev, [errorField]: true }));
+      setError("Numero de documento o contraseña incorrectos");
       return;
     }
 
@@ -70,9 +71,6 @@ const LoginPage = () => {
 
         <form onSubmit={handleLogin}>
           <CardContent>
-            {error && (
-                <p className="text-red-500 text-center mb-4">{error}</p>
-              )}
             <div className="mb-8">
               <FloatingLabelInput
                 type="username"
@@ -81,6 +79,7 @@ const LoginPage = () => {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Numero de documento"
                 hasError={fieldError.username}
+                errorMessage={error}
               />
             </div>
 
@@ -92,6 +91,7 @@ const LoginPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Contraseña"
                 hasError={fieldError.password}
+                errorMessage={error}
               />
             </div>
           </CardContent>

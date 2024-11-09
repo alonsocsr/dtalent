@@ -8,6 +8,7 @@ interface FloatingLabelInputProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder: string;
   hasError?: boolean;
+  errorMessage?: string;
 }
 
 const FloatingLabelInput: React.FC<FloatingLabelInputProps> = ({
@@ -17,6 +18,7 @@ const FloatingLabelInput: React.FC<FloatingLabelInputProps> = ({
   onChange,
   placeholder,
   hasError = false,
+  errorMessage,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -46,6 +48,9 @@ const FloatingLabelInput: React.FC<FloatingLabelInputProps> = ({
       >
         {placeholder}
       </label>
+      {hasError && (
+        <p className="text-red-500">{errorMessage}</p>
+      )}
     </div>
   );
 };

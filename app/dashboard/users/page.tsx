@@ -18,13 +18,35 @@ interface Pagination {
 type FilterOptionKeys = keyof typeof filterOptions;
 
 const filterOptions = {
-  Remuneracion: ["Sueldo", "Por hora"],
+  Remuneración: ["Jornalero", "Por hora"],
   Puesto: ["Manager", "Developer", "Designer"],
-  Sector: ["Ventas", "Marketing", "IT"],
+  Sección: ["Dev", "Marketing", "IT"],
   Turno: ["Mañana", "Tarde", "Noche"],
-  Activo: ["Activo", "Inactivo"],
-  nacionality: ["Paraguaya", "Aleman", "Canadiense"],
-  Role: ["Administrador", "Empleado", "Invitado"],
+  Estado: ["Activo", "Inactivo"],
+  Nacionalidad: ["Paraguaya", "Aleman", "Canadiense"],
+  Rol: ["Administrador", "Funcionario", "Supervisor"],
+};
+
+// Mapeo para traducir los valores del filtro al formato de la API
+const filterMapping: { [key in keyof typeof filterOptions]: { [key: string]: string } } = {
+  Remuneración: { "Jornalero": "Jornalero", "Por hora": "hourly" },
+  Puesto: { "Manager": "manager", "Developer": "developer", "Designer": "designer" },
+  Sección: { "Dev": "Dev", "Marketing": "marketing", "IT": "it" },
+  Turno: { "Mañana": "8-16", "Tarde": "afternoon", "Noche": "night" },
+  Estado: { "Activo": "true", "Inactivo": "false" },
+  Nacionalidad: { "Paraguaya": "Paraguaya", "Aleman": "Aleman", "Canadiense": "Canadiense" },
+  Rol: { "Funcionario": "Funcionario", "Supervisor": "Supervisor" },
+};
+
+// Mapeo de las claves en español a las claves en inglés para la API
+const filterKeyMapping: { [key in keyof typeof filterOptions]: string } = {
+  Remuneración: "remunerationType",
+  Puesto: "position",
+  Sección: "section",
+  Turno: "workshift",
+  Estado: "isActive",
+  Nacionalidad: "nationality",
+  Rol: "role",
 };
 
 const sortMapping: { [key: string]: string } = {
@@ -123,16 +145,13 @@ const UsersPage = () => {
     setSort(apiSortKey);
   };
 
-  const handleFilterChange = (field: FilterOptionKeys, value: string) => {
-    setFilter((prev) => {
-      if (value === "") {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { [field]: _, ...rest } = prev;
-        return rest;
-      }
-      return { ...prev, [field]: value };
-    });
+  const handleFilterChange = (field: keyof typeof filterOptions, value: string) => {
+    const apiFieldKey = filterKeyMapping[field]; // Traducir la clave al inglés
+    const apiFilterValue = filterMapping[field][value] || "";
+  
+    setFilter((prev) => (value ? { ...prev, [apiFieldKey]: apiFilterValue } : { ...prev, [apiFieldKey]: "" }));
   };
+  
 
   const toggleFilters = () => {
     setFiltersVisible(!filtersVisible);
@@ -166,8 +185,8 @@ const UsersPage = () => {
   const toggleSort = () => setSortVisible((prev) => !prev);
 
   return (
-    <div className="bg-gray-100 min-h-screen">
-      <div className='flex justify-between items-center space-x-2 p-8'>
+    <div className="bg-gray-100 min-h-screen p-6">
+      <div className='flex justify-between items-center space-x-2 mb-4'>
         <div className='flex space-x-2'>
           <h2 className="text-3xl font-semibold text-gray-800">
             Lista de empleados 
@@ -290,43 +309,45 @@ const UsersPage = () => {
         </div>
       ) : (
         <>
-          <table className="w-full bg-white shadow-lg rounded-lg">
-          <thead>
-            <tr className="bg-blue-500 text-white text-left">
-              <th className="px-6 py-4 font-semibold">Número</th>
-              <th className="px-6 py-4 font-semibold">Nombre</th>
-              <th className="px-6 py-4 font-semibold">Correo electrónico</th>
-              <th className="px-6 py-4 font-semibold">Teléfono / Celular</th>
-              <th className="px-6 py-4 font-semibold">Estatus</th>
-              <th className="px-6 py-4 font-semibold"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((u) => (
-              <tr key={u.id} className="border-b">
-                <td className="px-6 py-4 flex items-center space-x-2">
-                  <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center">
-                    {u.initials}
-                  </div>
-                  <span className="text-blue-500 font-semibold">#{u.employeeNumber}</span>
-                </td>
-                <td className="px-6 py-4">{u.fullName}</td>
-                <td className="px-6 py-4">{u.email}</td>
-                <td className="px-6 py-4">{u.phoneNumber}</td>
-                <td className="px-6 py-4 flex ">
-                  <div className="flex items-center text-center space-x-2 rounded-full bg-green-700">
-                    <div className={`text-${true ? 'white' : 'red'} flex items-center text-center p-2 font-semibold`}>
-                      {true ? 'Activo' : 'Inactivo'}
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-blue-500 cursor-pointer">
-                  <FaUserEdit />
-                </td>
+          <div className='overflow-hidden border border-gray-200 rounded-lg'>
+            <table className="w-full bg-white shadow-lg rounded-lg">
+            <thead>
+              <tr className="bg-blue-500 text-white text-left">
+                <th className="px-6 py-4 font-semibold">Número</th>
+                <th className="px-6 py-4 font-semibold">Nombre</th>
+                <th className="px-6 py-4 font-semibold">Correo electrónico</th>
+                <th className="px-6 py-4 font-semibold">Teléfono / Celular</th>
+                <th className="px-6 py-4 font-semibold">Estatus</th>
+                <th className="px-6 py-4 font-semibold"></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {users.map((u) => (
+                <tr key={u.id} className="border-b">
+                  <td className="px-6 py-4 flex items-center space-x-2">
+                    <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                      {u.initials}
+                    </div>
+                    <span className="text-blue-500 font-semibold">#{u.employeeNumber}</span>
+                  </td>
+                  <td className="px-6 py-4">{u.fullName}</td>
+                  <td className="px-6 py-4">{u.email}</td>
+                  <td className="px-6 py-4">{u.phoneNumber}</td>
+                  <td className="px-6 py-4 flex ">
+                    <div className="flex items-center text-center space-x-2 rounded-full bg-green-700">
+                      <div className={`text-${true ? 'white' : 'red'} flex items-center text-center p-2 font-semibold`}>
+                        {true ? 'Activo' : 'Inactivo'}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-blue-500 cursor-pointer">
+                    <FaUserEdit />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          </div>
 
         {/* Pagination */}
         <div className="flex justify-center mt-4 space-x-4">
